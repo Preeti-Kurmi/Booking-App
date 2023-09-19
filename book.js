@@ -29,6 +29,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const deleteButton = document.createElement("button");
             deleteButton.innerText = "Delete";
             deleteButton.addEventListener("click", () => deleteAppointment(index));
+            const deleteIcon = document.createElement("span");
+            deleteIcon.innerHTML = "&#128465;"; // Unicode representation of a trash can icon
+            deleteIcon.classList.add("delete-icon");
+            deleteIcon.addEventListener("click", () => deleteUserDetail(appointment._id)); // Pass the _id to the delete function
 
             appointmentDiv.appendChild(nameParagraph);
             appointmentDiv.appendChild(emailParagraph);
@@ -36,6 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
             appointmentDiv.appendChild(deleteButton);
 
             appointmentsContainer.appendChild(appointmentDiv);
+            appointmentDiv.appendChild(deleteIcon);
         });
     }
 
@@ -74,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const apiUrl = 'YOUR_CRUDCRUD_API_URL'; // Replace with your CRUD CRUD API URL
             const appointmentData = { name, email };
             const response = await axios.post(apiUrl, appointmentData);
-    
+
             if (response.status === 201) {
                 console.log('Appointment stored in the cloud successfully.');
             } else {
@@ -90,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const apiUrl = 'YOUR_CRUDCRUD_API_URL'; // Replace with your CRUD CRUD API URL
             const response = await axios.get(apiUrl);
-    
+
             if (response.status === 200) {
                 // Clear the local appointments and populate with retrieved data
                 appointments = response.data;
@@ -106,6 +111,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Call the function to retrieve appointments when the DOM is loaded
     retrieveAppointmentsFromCloud();
+    // In your book.js file
+
+// ... (previous code)
+
+// Function to delete a user detail
+async function deleteUserDetail(id) {
+    try {
+        const apiUrl = `YOUR_CRUDCRUD_API_URL/${id}`; // Replace with your CRUD CRUD API URL and user _id
+        const response = await axios.delete(apiUrl);
+
+        if (response.status === 200) {
+            // Remove the deleted user detail from the local appointments array
+            const indexToDelete = appointments.findIndex(appointment => appointment._id === id);
+            if (indexToDelete !== -1) {
+                appointments.splice(indexToDelete, 1);
+            }
+
+            // Update local storage with the modified appointments array
+            localStorage.setItem("appointments", JSON.stringify(appointments));
+
+            // Re-display appointments to remove the deleted detail from the website
+            displayAppointments();
+        } else {
+            console.error('Failed to delete the user detail from the cloud.');
+        }
+    } catch (error) {
+        console.error('An error occurred while deleting the user detail:', error);
+    }
+}
+
+// ... (remaining code)
+
 
     // Event listener for form submission
     appointmentForm.addEventListener("submit", function (e) {
