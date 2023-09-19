@@ -1,3 +1,5 @@
+// In your book.js file
+
 document.addEventListener("DOMContentLoaded", function () {
     const appointmentForm = document.getElementById("appointmentForm");
     const nameInput = document.getElementById("name");
@@ -66,6 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
             displayAppointments();
         }
     }
+
     async function storeAppointmentInCloud(name, email) {
         try {
             const apiUrl = 'YOUR_CRUDCRUD_API_URL'; // Replace with your CRUD CRUD API URL
@@ -81,6 +84,28 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('An error occurred while storing the appointment:', error);
         }
     }
+
+    // Function to retrieve appointments from the cloud
+    async function retrieveAppointmentsFromCloud() {
+        try {
+            const apiUrl = 'YOUR_CRUDCRUD_API_URL'; // Replace with your CRUD CRUD API URL
+            const response = await axios.get(apiUrl);
+    
+            if (response.status === 200) {
+                // Clear the local appointments and populate with retrieved data
+                appointments = response.data;
+                localStorage.setItem("appointments", JSON.stringify(appointments));
+                displayAppointments();
+            } else {
+                console.error('Failed to retrieve appointments from the cloud.');
+            }
+        } catch (error) {
+            console.error('An error occurred while retrieving appointments from the cloud:', error);
+        }
+    }
+
+    // Call the function to retrieve appointments when the DOM is loaded
+    retrieveAppointmentsFromCloud();
 
     // Event listener for form submission
     appointmentForm.addEventListener("submit", function (e) {
