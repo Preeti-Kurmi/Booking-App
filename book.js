@@ -66,6 +66,21 @@ document.addEventListener("DOMContentLoaded", function () {
             displayAppointments();
         }
     }
+    async function storeAppointmentInCloud(name, email) {
+        try {
+            const apiUrl = 'YOUR_CRUDCRUD_API_URL'; // Replace with your CRUD CRUD API URL
+            const appointmentData = { name, email };
+            const response = await axios.post(apiUrl, appointmentData);
+    
+            if (response.status === 201) {
+                console.log('Appointment stored in the cloud successfully.');
+            } else {
+                console.error('Failed to store appointment in the cloud.');
+            }
+        } catch (error) {
+            console.error('An error occurred while storing the appointment:', error);
+        }
+    }
 
     // Event listener for form submission
     appointmentForm.addEventListener("submit", function (e) {
@@ -79,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         addAppointment(name, email);
+        storeAppointmentInCloud(name, email)
 
         // Clear the form inputs
         nameInput.value = "";
