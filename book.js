@@ -33,6 +33,10 @@ document.addEventListener("DOMContentLoaded", function () {
             deleteIcon.innerHTML = "&#128465;"; // Unicode representation of a trash can icon
             deleteIcon.classList.add("delete-icon");
             deleteIcon.addEventListener("click", () => deleteUserDetail(appointment._id)); // Pass the _id to the delete function
+            const editIcon = document.createElement("span");
+            editIcon.innerHTML = "&#9998;"; // Unicode representation of a pencil icon
+            editIcon.classList.add("edit-icon");
+            editIcon.addEventListener("click", () => editUserDetail(appointment)); // Pass the appointment object to the edit function
 
             appointmentDiv.appendChild(nameParagraph);
             appointmentDiv.appendChild(emailParagraph);
@@ -41,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             appointmentsContainer.appendChild(appointmentDiv);
             appointmentDiv.appendChild(deleteIcon);
+            appointmentDiv.appendChild(editIcon);
         });
     }
 
@@ -113,56 +118,88 @@ document.addEventListener("DOMContentLoaded", function () {
     retrieveAppointmentsFromCloud();
     // In your book.js file
 
-// ... (previous code)
+    // ... (previous code)
 
-// Function to delete a user detail
-async function deleteUserDetail(id) {
-    try {
-        const apiUrl = `YOUR_CRUDCRUD_API_URL/${id}`; // Replace with your CRUD CRUD API URL and user _id
-        const response = await axios.delete(apiUrl);
+    // Function to delete a user detail
+    async function deleteUserDetail(id) {
+        try {
+            const apiUrl = `YOUR_CRUDCRUD_API_URL/${id}`; // Replace with your CRUD CRUD API URL and user _id
+            const response = await axios.delete(apiUrl);
 
-        if (response.status === 200) {
-            // Remove the deleted user detail from the local appointments array
-            const indexToDelete = appointments.findIndex(appointment => appointment._id === id);
-            if (indexToDelete !== -1) {
-                appointments.splice(indexToDelete, 1);
+            if (response.status === 200) {
+                // Remove the deleted user detail from the local appointments array
+                const indexToDelete = appointments.findIndex(appointment => appointment._id === id);
+                if (indexToDelete !== -1) {
+                    appointments.splice(indexToDelete, 1);
+                }
+
+                // Update local storage with the modified appointments array
+                localStorage.setItem("appointments", JSON.stringify(appointments));
+
+                // Re-display appointments to remove the deleted detail from the website
+                displayAppointments();
+            } else {
+                console.error('Failed to delete the user detail from the cloud.');
             }
-
-            // Update local storage with the modified appointments array
-            localStorage.setItem("appointments", JSON.stringify(appointments));
-
-            // Re-display appointments to remove the deleted detail from the website
-            displayAppointments();
-        } else {
-            console.error('Failed to delete the user detail from the cloud.');
+        } catch (error) {
+            console.error('An error occurred while deleting the user detail:', error);
         }
-    } catch (error) {
-        console.error('An error occurred while deleting the user detail:', error);
     }
-}
 
-// ... (remaining code)
+    // ... (remaining code)
 
 
     // Event listener for form submission
-    appointmentForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-        const name = nameInput.value.trim();
-        const email = emailInput.value.trim();
-
-        if (name === "" || email === "") {
-            alert("Please fill in both Name and Email fields.");
-            return;
-        }
-
-        addAppointment(name, email);
-        storeAppointmentInCloud(name, email)
-
-        // Clear the form inputs
-        nameInput.value = "";
-        emailInput.value = "";
-    });
-
-    // Initial display of appointments
-    displayAppointments();
-});
+    function editUserDetail(appointment) {
+        // Populate the registration form with the user's details for editing
+        nameInput.value = appointment.name;
+        emailInput.value = appointment.email;
+        // Store the index of the appointment being edited
+        const editingIndex = appointments.findIndex(appt => appt._id === appointment._id);
+    
+        // Update the form submission event listener to handle edits
+        appointmentForm.onsubmit = function (e) {
+            e.preventDefault();
+            const updatedName = nameInput.value.trim();
+            const updatedEmail = emailInput.value.trim();
+    
+            if (updatedName === "" || updatedEmail === "") {
+                alert("Please fill in both Name and Email fields.");
+                return;
+            }
+    
+            // Update the local appointments array
+            appointments[editingIndex].name = updatedName;
+            appointments[editingIndex].email = updatedEmail;
+            // Update the cloud and re-display appointments
+            storeAppointmentInCloud(updatedName, updatedEmail);
+            localStorage.setItem("appointments", JSON.stringify(appointments));
+            displayAppointments();
+    
+            // Clear the form inputs and reset the form submission listener
+            nameInput.value = "";
+            emailInput.value = "";
+            appointmentForm.onsubmit = function (e) {
+                e.preventDefault();
+                const name = nameInput.value.trim();
+                const email = emailInput.value.trim();
+    
+                if (name === "" || email === "") {
+                    alert("Please fill in both Name and Email fields.");
+                    return;
+                }
+    
+                addAppointment(name, email);
+                storeAppointmentInCloud(name, email);
+    
+                // Clear the form inputs
+                nameInput.value = "";
+                emailInput.value = "";
+            };
+        };
+    }
+    
+    
+    
+    
+    
